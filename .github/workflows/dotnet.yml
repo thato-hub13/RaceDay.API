@@ -1,0 +1,43 @@
+
+name: RaceDay API - Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build Solution and Run Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Display .NET information
+        run: dotnet --info
+
+      - name: Restore solution dependencies
+        run: dotnet restore RaceDay.API.slnx
+
+      - name: Build solution
+        run: dotnet build RaceDay.API.slnx --configuration Release --no-restore
+
+      - name: Run RaceDay unit tests
+        run: dotnet test RaceDay.Test/RaceDay.Test.csproj --configuration Release --no-build --logger "console;verbosity=normal"
+
+      - name: Publish API
+        run: dotnet publish RaceDay.API/RaceDay.API.csproj --configuration Release --no-build --output ./publish
